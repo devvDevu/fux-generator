@@ -1,4 +1,4 @@
-package custom_type_gen
+package domain_gen
 
 import (
 	"os"
@@ -15,51 +15,46 @@ import (
 const codeTemplate = `
 package {{.PackageName}}
 
-type {{.TypeName}} {{.Type}}
-
-func (ct {{.TypeName}}) {{.MethodName}}() {{.Type}} {
-	return {{.Type}}(ct)
-} `
-
-type CustomTypeGenerator struct {
-	Files []*CustomType
+type {{.TypeName}} struct {
+	{{range .Fields}}
+	{{.Name}} {{.Type}} ` + "`" + `{{.Tag}}` + "`" + `
+	{{end}}
 }
 
-func NewCustomTypeGenerator(files []*CustomType) *CustomTypeGenerator {
-	return &CustomTypeGenerator{
-		Files: files,
-	}
+`
+
+type DomainGenerator struct {
+	Files []*Domain
 }
 
-// FilePath: path to the file Example: "internal/custom_type_gen"
-// FileName: name of the file Example: "custom_type"
-// FileExt: extension of the file Example: ".go"
-// FileType: type of the file Example: "string || int || bool || float64"
-type CustomType struct {
+type Domain struct {
 	FilePath string
 	FileName string
 	FileExt  string
-	FileType string
+	Fields   []*Field
 }
 
-func NewCustomType(filePath, fileName, fileExt, fileType string) *CustomType {
-	return &CustomType{
-		FilePath: filePath,
-		FileName: fileName,
-		FileExt:  fileExt,
-		FileType: fileType,
-	}
+type Field struct {
+	Name string
+	Type string
+	Tag  string
 }
 
 type Code struct {
 	PackageName string
 	TypeName    string
-	Type        string
-	MethodName  string
+	Fields      []*Field
 }
 
-// Generating code for all files
-func (c *CustomTypeGenerator) Generate() error {
+func NewDomainGenerator(files []*Domain) *DomainGenerator {
+	return &DomainGenerator{Files: files}
+}
+
+func NewDomain(filePath, fileName, fileExt string, fields []*Field) *Domain {
+	return &Domain{FilePath: filePath, FileName: fileName, FileExt: fileExt, Fields: fields}
+}
+
+func (c *DomainGenerator) Generate() error {
 	for _, file := range c.Files {
 		err := generateCode(file)
 		if err != nil {
@@ -74,21 +69,19 @@ func (c *CustomTypeGenerator) Generate() error {
 }
 
 // Creating file with generated code
-func generateCode(file *CustomType) error {
+func generateCode(file *Domain) error {
 	tmpl, err := template.New("code").Parse(codeTemplate)
 	if err != nil {
 		return err
 	}
 
-	methodName := getMethodName(file.FileType)
 	packageName := getPackageName(file.FilePath)
 	typeName := toCamelCase(file.FileName)
 
 	code := Code{
 		PackageName: packageName,
 		TypeName:    typeName,
-		Type:        file.FileType,
-		MethodName:  methodName,
+		Fields:      file.Fields,
 	}
 
 	filePath := filepath.Join(file.FilePath, "/", file.FileName+file.FileExt)
@@ -111,11 +104,6 @@ func generateCode(file *CustomType) error {
 func getPackageName(filePath string) string {
 	words := strings.Split(filePath, "/")
 	return words[len(words)-1]
-}
-
-func getMethodName(fileType string) string {
-	words := strings.Split(fileType, ".")
-	return cases.Title(language.Und).String(strings.ToLower(words[len(words)-1]))
 }
 
 // Converting file name to camel case
