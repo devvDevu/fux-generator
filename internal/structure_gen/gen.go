@@ -10,7 +10,6 @@ import (
 	"ca-generator/internal/mocked_gens/result_gen"
 	"encoding/json"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -100,12 +99,6 @@ func formatingSettingsData(
 		case map[string]interface{}:
 			// Обрабатываем вложенные директории
 			*folders = append(*folders, newPath)
-			logrus.Info(key)
-			if key == "settings" {
-				logrus.Infof("initializing go mod for %s", v["settings"].(string))
-				cmd := exec.Command("go", "mod", "init", v["settings"].(string))
-				cmd.Run()
-			}
 			if strings.Contains(newPath, "error_with_codes") {
 				*errorWithCodes = newPath
 			}
