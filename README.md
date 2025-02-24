@@ -19,10 +19,7 @@
 
 ### Установка Linux
 ```bash
-git clone -b ver_1 https://github.com/devvDevu/ca-generator.git
-cd ca-generator
-go build -o ca-gen cmd/main.go
-sudo mv ca-gen /usr/local/bin
+curl -sSL https://raw.githubusercontent.com/devvDevu/ca-generator/main/scripts/install.sh | bash
 ```
 
 ### Запуск Linux
