@@ -20,6 +20,7 @@ git clone -q -b ver_1 https://github.com/devvDevu/ca-generator.git $TMP_DIR
 
 echo "Building binary..."
 cd $TMP_DIR
+go install golang.org/x/tools/cmd/goimports@latest
 go build -o ca-gen cmd/main.go
 
 echo "Installing to /usr/local/bin..."
