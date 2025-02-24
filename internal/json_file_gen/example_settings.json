@@ -1,0 +1,83 @@
+{
+    "settings": {
+            "example_name_of_project": {
+                "cmd": {
+                    "app": {}
+                },
+                "internal": {
+                    "config": {},
+                    "common": {
+                        "types": {
+                            "error_with_codes": {},
+                            "example_type": [ 
+                                {
+                                    "file_name": "example_field",
+                                    "file_ext": ".go",
+                                    "file_type": "example_type"
+                                }
+                                
+                            ]
+                        }
+                    },
+                    "adapter": {
+                        "example_adapter": {}
+                    },
+                    "repository": {
+                        "example_repository": {}
+                    },
+                    "service": {
+                        "example_service": {}
+                    },
+                    "usecase": {
+                        "example_usecase": {}
+                    },
+                    "handler": {
+                        "example_handler": {}
+                    },
+                    "value_object": {
+                        "example_value_object": [
+                            {
+                                "file_name": "example_value_object",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "example_field",
+                                        "type": "example_type.ExampleType",
+                                        "tag": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "model": {
+                        "example_model": [
+                            {
+                                "file_name": "example",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "example_field",
+                                        "type": "example_type.ExampleType",
+                                        "tag": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "data_transfer_object":{
+                        "example_dto": {
+                            "response": {},
+                            "request": {}
+                        },
+                        "result": {}
+                    },
+                    "pkg": {
+                        "env":{}
+                    }
+                },
+                "migrations": {
+                    "postgres": {}
+                }
+            }
+        }
+}
