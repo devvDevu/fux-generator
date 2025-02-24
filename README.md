@@ -28,4 +28,4 @@ ca-gen
 ```
 
 ## Примеры кода:
-1. [Конфигурация](https://github.com/devvDevu/ca-generator/blob/ver_1/internal/json_file_gen/example_settings.json)
+1. [Конфигурация](https://github.com/devvDevu/fux-generator/blob/main/internal/json_file_gen/example_settings.json)
