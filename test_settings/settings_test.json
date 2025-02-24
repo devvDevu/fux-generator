@@ -1,0 +1,186 @@
+{
+    "settings": {
+            "fux": {
+                "cmd": {
+                    "app": {}
+                },
+                "internal": {
+                    "config": {},
+                    "common": {
+                        "error_with_codes": {},
+                        "types": {
+                            "user_type": [ 
+                                {
+                                    "file_name": "user_name",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                },
+                                {
+                                    "file_name": "user_email",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                },
+                                {
+                                    "file_name": "user_password",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                }
+                                
+                            ],
+                            "mommy_type": [ 
+                                {
+                                    "file_name": "mommy_sex",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                },
+                                {
+                                    "file_name": "mommy_phone_number",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                },
+                                {
+                                    "file_name": "mommy_password",
+                                    "file_ext": ".go",
+                                    "file_type": "string"
+                                }
+                                
+                            ]
+                        }
+                    },
+                    "adapter": {
+                        "database_adapter": {},
+                        "kafka_adapter": {}
+                    },
+                    "repository": {
+                        "user_repository": {},
+                        "mommy_repository": {}
+                    },
+                    "service": {
+                        "user_service": {},
+                        "mommy_service": {}
+                    },
+                    "usecase": {
+                        "user_usecase": {},
+                        "mommy_usecase": {}
+                    },
+                    "handler": {
+                        "user_handler": {},
+                        "mommy_handler": {}
+                    },
+                    "value_object": {
+                        "user_value_object": [
+                            {
+                                "file_name": "user_value_object",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "Name",
+                                        "type": "user_type.UserName",
+                                        "tag": ""
+                                    },
+                                    {
+                                        "name": "Email",
+                                        "type": "user_type.UserEmail",
+                                        "tag": ""
+                                    },
+                                    {
+                                        "name": "Password",
+                                        "type": "user_type.UserPassword",
+                                        "tag": ""
+                                    }
+                                ]
+                            }
+                        ],
+                        "mommy_value_object": [
+                            {
+                                "file_name": "mommy_value_object",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "Sex",
+                                        "type": "mommy_type.MommySex",
+                                        "tag": ""
+                                    },
+                                    {
+                                        "name": "PhoneNumber",
+                                        "type": "mommy_type.MommyPhoneNumber",
+                                        "tag": ""
+                                    },
+                                    {
+                                        "name": "Password",
+                                        "type": "mommy_type.MommyPassword",
+                                        "tag": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "model": {
+                        "user_model": [
+                            {
+                                "file_name": "user",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "Name",
+                                        "type": "user_type.UserName",
+                                        "tag": "db:"
+                                    },
+                                    {
+                                        "name": "Email",
+                                        "type": "user_type.UserEmail",
+                                        "tag": "db:"
+                                    },
+                                    {
+                                        "name": "Password",
+                                        "type": "user_type.UserPassword",
+                                        "tag": "db:"
+                                    }
+                                ]
+                            }
+                        ],
+                        "mommy_model": [
+                            {
+                                "file_name": "mommy",
+                                "file_ext": ".go",
+                                "fields": [
+                                    {
+                                        "name": "Sex",
+                                        "type": "mommy_type.MommySex",
+                                        "tag": "db:"
+                                    },
+                                    {
+                                        "name": "PhoneNumber",
+                                        "type": "mommy_type.MommyPhoneNumber",
+                                        "tag": "db:"
+                                    },
+                                    {
+                                        "name": "Password",
+                                        "type": "mommy_type.MommyPassword",
+                                        "tag": "db:"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "data_transfer_object":{
+                        "user_dto": {
+                            "response": {},
+                            "request": {}
+                        },
+                        "mommy_dto": {
+                            "response": {},
+                            "request": {}
+                        },
+                        "result": {}
+                    },
+                    "pkg": {
+                        "env":{}
+                    }
+                },
+                "migrations": {
+                    "postgres": {}
+                }
+            }
+        }
+}
