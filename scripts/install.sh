@@ -24,7 +24,7 @@ go install golang.org/x/tools/cmd/goimports@latest
 go build -o ca-gen cmd/main.go
 
 echo "Installing to /usr/local/bin..."
-sudo mv -f ca-gen /usr/local/bin/
+sudo mv -f fux-gen /usr/local/bin/
 
 rm -rf $TMP_DIR
-echo -e "${GREEN}Done! Use command: ca-gen${NC}"
+echo -e "${GREEN}Done! Use command: fux-gen${NC}"

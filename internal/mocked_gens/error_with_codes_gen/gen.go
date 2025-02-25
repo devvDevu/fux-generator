@@ -34,7 +34,7 @@ func GenerateErrorWithCodes(filePath string) error {
 }
 
 const code1 = `
-package common
+package error_with_codes
 
 import "strconv"
 
@@ -70,7 +70,7 @@ var (
 	ErrorFailedToReadConfig = NewError("failed to read config", CodeFailedToReadConfig)
 )`
 
-const code2 = `package common
+const code2 = `package error_with_codes
 
 import (
 	"fmt"

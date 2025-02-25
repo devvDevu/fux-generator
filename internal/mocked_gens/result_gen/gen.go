@@ -10,7 +10,7 @@ import (
 func GenerateResult(filePath string) error {
 	err := os.WriteFile(filePath+"/result_err.go", []byte(code1), 0644)
 	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
+		logrus.Errorf("Error writing result_err: %v", err)
 		return err
 	}
 
@@ -21,7 +21,7 @@ func GenerateResult(filePath string) error {
 
 	err = os.WriteFile(filePath+"/result_ok.go", []byte(code2), 0644)
 	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
+		logrus.Errorf("Error writing result_ok: %v", err)
 		return err
 	}
 
@@ -50,7 +50,7 @@ type ResultErr struct {
 func NewResultErr(err error) *ResultErr {
 	var code int
 
-	if errCode, errErr := common.ToErrorWithCode(err); errErr != nil {
+	if errCode, errErr := error_with_codes.ToErrorWithCode(err); errErr != nil {
 		code = int(errCode.GetCode())
 	}
 

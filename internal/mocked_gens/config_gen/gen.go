@@ -10,7 +10,7 @@ import (
 func GenerateConfig(filePath string) error {
 	err := os.WriteFile(filePath+"/config.go", []byte(code1), 0644)
 	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
+		logrus.Errorf("Error writing config: %v", err)
 		return err
 	}
 	cmd := exec.Command("goimports", "-w", filePath+"/config.go")
@@ -20,7 +20,7 @@ func GenerateConfig(filePath string) error {
 
 	err = os.WriteFile(filePath+"/env.go", []byte(code2), 0644)
 	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
+		logrus.Errorf("Error writing env: %v", err)
 		return err
 	}
 	cmd = exec.Command("goimports", "-w", filePath+"/env.go")
@@ -59,14 +59,14 @@ func MustLoad(ctx context.Context, configPath string, envReader envReader) *Conf
 	if os.IsNotExist(err) {
 		logrus.WithFields(logrus.Fields{
 			"config_path": configPath,
-		}).WithError(err).Fatal(common.ErrorFailedToFindConfig.SetOperation(operation)) // set operation on custom error
+		}).WithError(err).Fatal(error_with_codes.ErrorFailedToFindConfig.SetOperation(operation)) // set operation on custom error
 	}
 
 	err = envReader.EnvReadConfig(configPath, cfg)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"config_path": configPath,
-		}).WithError(err).Fatal(common.ErrorFailedToReadConfig.SetOperation(operation)) // set operation on custom error
+		}).WithError(err).Fatal(error_with_codes.ErrorFailedToReadConfig.SetOperation(operation)) // set operation on custom error
 	}
 
 	return cfg

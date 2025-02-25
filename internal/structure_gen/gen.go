@@ -6,6 +6,7 @@ import (
 	"ca-generator/internal/folders_gen"
 	"ca-generator/internal/json_file_gen"
 	"ca-generator/internal/mocked_gens/config_gen"
+	"ca-generator/internal/mocked_gens/env_gen"
 	"ca-generator/internal/mocked_gens/error_with_codes_gen"
 	"ca-generator/internal/mocked_gens/result_gen"
 	"encoding/json"
@@ -24,6 +25,7 @@ type Generator struct {
 	ErrorWithCodes string
 	Config         string
 	Result         string
+	Env            string
 }
 
 func NewGenerator(settingsFilePath string) (*Generator, error) {
@@ -53,7 +55,7 @@ func NewGenerator(settingsFilePath string) (*Generator, error) {
 
 func (g *Generator) Generate() {
 	// formating settings data
-	formatingSettingsData(g.Settings["settings"].(map[string]interface{}), "", &g.Folders, &g.Files, &g.Domain, &g.ErrorWithCodes, &g.Config, &g.Result)
+	formatingSettingsData(g.Settings["settings"].(map[string]interface{}), "", &g.Folders, &g.Files, &g.Domain, &g.ErrorWithCodes, &g.Config, &g.Result, &g.Env)
 
 	// generating structure
 	err := folders_gen.NewFolderGenerator(g.Folders).Generate()
@@ -80,6 +82,10 @@ func (g *Generator) Generate() {
 	if err != nil {
 		logrus.Fatalf("Error generating config: %v", err)
 	}
+	err = env_gen.GenerateEnv(g.Env)
+	if err != nil {
+		logrus.Fatalf("Error generating env: %v", err)
+	}
 }
 
 func formatingSettingsData(
@@ -91,6 +97,7 @@ func formatingSettingsData(
 	errorWithCodes *string,
 	config *string,
 	result *string,
+	env *string,
 ) {
 	for key, value := range node {
 		newPath := filepath.Join(currentPath, key)
@@ -108,7 +115,10 @@ func formatingSettingsData(
 			if strings.Contains(newPath, "result") {
 				*result = newPath
 			}
-			formatingSettingsData(v, newPath, folders, files, domains, errorWithCodes, config, result)
+			if strings.Contains(newPath, "pkg/env") {
+				*env = newPath
+			}
+			formatingSettingsData(v, newPath, folders, files, domains, errorWithCodes, config, result, env)
 
 		case []interface{}:
 			// Обрабатываем файлы
