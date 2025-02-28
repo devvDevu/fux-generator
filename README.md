@@ -24,7 +24,7 @@ curl -sSL https://raw.githubusercontent.com/devvDevu/ca-generator/main/scripts/i
 
 ### Запуск Linux
 ```bash
-ca-gen
+fux-gen
 ```
 
 ## Примеры кода:
