@@ -2,6 +2,7 @@ package folders_gen
 
 import (
 	"os"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
@@ -16,16 +17,18 @@ func NewFolderGenerator(folders []string) *FolderGenerator {
 	}
 }
 
-func (fg *FolderGenerator) Generate() error {
+func (fg *FolderGenerator) Generate(wg *sync.WaitGroup) error {
 	for _, folder := range fg.Folders {
-		if err := os.MkdirAll(folder, 0755); err != nil {
-			logrus.WithFields(logrus.Fields{
-				"folder": folder,
-				"error":  err,
-			}).Error("Failed to create folder")
-			return err
-		}
+		wg.Add(1)
+		go func(folder string) {
+			defer wg.Done()
+			if err := os.MkdirAll(folder, 0755); err != nil {
+				logrus.WithFields(logrus.Fields{
+					"folder": folder,
+					"error":  err,
+				}).Error("Failed to create folder")
+			}
+		}(folder)
 	}
-
 	return nil
 }
