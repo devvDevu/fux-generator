@@ -3,40 +3,37 @@ package result_gen
 import (
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
-func GenerateResult(filePath string) error {
-	err := os.WriteFile(filePath+"/result_err.go", []byte(code1), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing result_err: %v", err)
-		return err
+func GenerateResult(wg *sync.WaitGroup, errCh chan error, filePath string) {
+	for shortPath, code := range codeMap {
+		wg.Add(1)
+		go func(shortPath string, code string) {
+			defer wg.Done()
+			err := os.WriteFile(filePath+shortPath, []byte(code), 0644)
+			if err != nil {
+				logrus.Errorf("Error writing result_err: %v", err)
+				errCh <- err
+				return
+			}
+
+			cmd := exec.Command("goimports", "-w", filePath+shortPath)
+			cmd.Run()
+
+			logrus.Infof("generated code for %s", filePath+shortPath)
+		}(shortPath, code)
 	}
-
-	cmd := exec.Command("goimports", "-w", filePath+"/result_err.go")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/result_err.go")
-
-	err = os.WriteFile(filePath+"/result_ok.go", []byte(code2), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing result_ok: %v", err)
-		return err
-	}
-
-	cmd = exec.Command("goimports", "-w", filePath+"/result_ok.go")
-	cmd.Run()
-
-	cmd = exec.Command("go get github.com/goccy/go-json")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/result_err.go")
-
-	return nil
 }
 
-const code1 = `package result
+var codeMap = map[string]string{
+	"/result_err.go": code1,
+	"/result_ok.go":  code2,
+}
+
+var code1 = `package result
 
 import (
 	"github.com/goccy/go-json"
@@ -63,7 +60,8 @@ func NewResultErr(err error) *ResultErr {
 func (r *ResultErr) GetJson() ([]byte, error) {
 	return json.Marshal(r)
 }`
-const code2 = `package result
+
+var code2 = `package result
 
 import (
 	"time"

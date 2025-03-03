@@ -8,6 +8,7 @@ import (
 )
 
 func GenerateEnv(filePath string) error {
+	os.MkdirAll(filePath, 0755)
 	err := os.WriteFile(filePath+"/env.go", []byte(code1), 0644)
 	if err != nil {
 		logrus.Errorf("Error writing env: %v", err)

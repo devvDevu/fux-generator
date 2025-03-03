@@ -57,65 +57,54 @@ func NewGenerator(settingsFilePath string) (*Generator, error) {
 func (g *Generator) Generate() {
 	wg := sync.WaitGroup{}
 	// formating settings data
-	formatingSettingsData(&wg, g.Settings["settings"].(map[string]interface{}), "", &g.Folders, &g.Files, &g.Domain, &g.ErrorWithCodes, &g.Config, &g.Result, &g.Env)
-	wg.Wait()
+	formatingSettingsData(g.Settings["settings"].(map[string]interface{}), "", &g.Folders, &g.Files, &g.Domain, &g.ErrorWithCodes, &g.Config, &g.Result, &g.Env)
 
-	logrus.Info(len(g.Folders))
 	// generating structure
-	err := folders_gen.NewFolderGenerator(g.Folders).Generate(&wg)
+	err := folders_gen.NewFolderGenerator(g.Folders).Generate()
 	if err != nil {
 		logrus.Fatalf("Error generating folders: %v", err)
 	}
-	wg.Wait()
-	logrus.Info("Folders generated")
+
+	// error catching goroutine
+	errCh := make(chan error)
+	go func() {
+		for err := range errCh {
+			logrus.Fatalf("Error generating: %v", err)
+		}
+	}()
+
 	wg.Add(6)
 	go func() {
 		defer wg.Done()
-		err = custom_type_gen.NewCustomTypeGenerator(g.Files).Generate()
-		if err != nil {
-			logrus.Fatalf("Error generating custom types: %v", err)
-		}
+		custom_type_gen.NewCustomTypeGenerator(g.Files).Generate(&wg, errCh)
 	}()
 	go func() {
 		defer wg.Done()
-		err = domain_gen.NewDomainGenerator(g.Domain).Generate()
-		if err != nil {
-			logrus.Fatalf("Error generating models: %v", err)
-		}
+		domain_gen.NewDomainGenerator(g.Domain).Generate(&wg, errCh)
 	}()
 	go func() {
 		defer wg.Done()
-		err = error_with_codes_gen.GenerateErrorWithCodes(g.ErrorWithCodes)
-		if err != nil {
-			logrus.Fatalf("Error generating error with codes: %v", err)
-		}
+		error_with_codes_gen.GenerateErrorWithCodes(&wg, errCh, g.ErrorWithCodes)
 	}()
 	go func() {
 		defer wg.Done()
-		err = result_gen.GenerateResult(g.Result)
-		if err != nil {
-			logrus.Fatalf("Error generating result: %v", err)
-		}
+		result_gen.GenerateResult(&wg, errCh, g.Result)
 	}()
 	go func() {
 		defer wg.Done()
-		err = config_gen.GenerateConfig(g.Config)
-		if err != nil {
-			logrus.Fatalf("Error generating config: %v", err)
-		}
+		config_gen.GenerateConfig(&wg, errCh, g.Config)
 	}()
 	go func() {
 		defer wg.Done()
-		err = env_gen.GenerateEnv(g.Env)
+		err := env_gen.GenerateEnv(g.Env)
 		if err != nil {
-			logrus.Fatalf("Error generating env: %v", err)
+			errCh <- err
 		}
 	}()
 	wg.Wait()
 }
 
 func formatingSettingsData(
-	wg *sync.WaitGroup,
 	node map[string]interface{},
 	currentPath string,
 	folders *[]string,
@@ -126,13 +115,13 @@ func formatingSettingsData(
 	result *string,
 	env *string,
 ) {
+	wg := sync.WaitGroup{}
 	mu := sync.Mutex{}
 	for key, value := range node {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			newPath := filepath.Join(currentPath, key)
-			logrus.Info(newPath)
 			switch v := value.(type) {
 			case map[string]interface{}:
 				// Обрабатываем вложенные директории
@@ -140,30 +129,26 @@ func formatingSettingsData(
 				*folders = append(*folders, newPath)
 				mu.Unlock()
 				if strings.Contains(newPath, "error_with_codes") {
-					logrus.Info("error_with_codes")
 					mu.Lock()
 					*errorWithCodes = newPath
 					mu.Unlock()
 				}
 				if strings.Contains(newPath, "config") {
-					logrus.Info("config")
 					mu.Lock()
 					*config = newPath
 					mu.Unlock()
 				}
 				if strings.Contains(newPath, "result") {
-					logrus.Info("result")
 					mu.Lock()
 					*result = newPath
 					mu.Unlock()
 				}
 				if strings.Contains(newPath, "pkg/env") {
-					logrus.Info("env")
 					mu.Lock()
 					*env = newPath
 					mu.Unlock()
 				}
-				formatingSettingsData(wg, v, newPath, folders, files, domains, errorWithCodes, config, result, env)
+				formatingSettingsData(v, newPath, folders, files, domains, errorWithCodes, config, result, env)
 
 			case []interface{}:
 				// Обрабатываем файлы
@@ -172,7 +157,6 @@ func formatingSettingsData(
 				mu.Unlock()
 				if strings.Contains(newPath, "common") {
 					for _, item := range v {
-						logrus.Info("common")
 						fileData := item.(map[string]interface{})
 						customType := custom_type_gen.NewCustomType(newPath, fileData["file_name"].(string), fileData["file_ext"].(string), fileData["file_type"].(string))
 						mu.Lock()
@@ -181,7 +165,6 @@ func formatingSettingsData(
 					}
 				}
 				if strings.Contains(newPath, "model") || strings.Contains(newPath, "value_object") {
-					logrus.Info("domain")
 					for _, item := range v {
 						fileData := item.(map[string]interface{})
 						fields := make([]*domain_gen.Field, 0)
@@ -204,4 +187,5 @@ func formatingSettingsData(
 			}
 		}()
 	}
+	wg.Wait()
 }

@@ -17,7 +17,8 @@ func NewFolderGenerator(folders []string) *FolderGenerator {
 	}
 }
 
-func (fg *FolderGenerator) Generate(wg *sync.WaitGroup) error {
+func (fg *FolderGenerator) Generate() error {
+	wg := sync.WaitGroup{}
 	for _, folder := range fg.Folders {
 		wg.Add(1)
 		go func(folder string) {
@@ -30,5 +31,6 @@ func (fg *FolderGenerator) Generate(wg *sync.WaitGroup) error {
 			}
 		}(folder)
 	}
+	wg.Wait()
 	return nil
 }

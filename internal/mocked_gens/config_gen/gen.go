@@ -3,35 +3,36 @@ package config_gen
 import (
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
-func GenerateConfig(filePath string) error {
-	err := os.WriteFile(filePath+"/config.go", []byte(code1), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing config: %v", err)
-		return err
+func GenerateConfig(wg *sync.WaitGroup, errCh chan error, filePath string) {
+	for shortPath, code := range codeMap {
+		wg.Add(1)
+		go func(shortPath string, code string) {
+			defer wg.Done()
+			err := os.WriteFile(filePath+shortPath, []byte(code), 0644)
+			if err != nil {
+				logrus.Errorf("Error writing config: %v", err)
+				errCh <- err
+				return
+			}
+			cmd := exec.Command("goimports", "-w", filePath+shortPath)
+			cmd.Run()
+
+			logrus.Infof("generated code for %s", filePath+shortPath)
+		}(shortPath, code)
 	}
-	cmd := exec.Command("goimports", "-w", filePath+"/config.go")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/config.go")
-
-	err = os.WriteFile(filePath+"/env.go", []byte(code2), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing env: %v", err)
-		return err
-	}
-	cmd = exec.Command("goimports", "-w", filePath+"/env.go")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/env.go")
-
-	return nil
 }
 
-const code1 = `package config
+var codeMap = map[string]string{
+	"/config.go": code1,
+	"/env.go":    code2,
+}
+
+var code1 = `package config
 
 import (
 	"context"
@@ -71,7 +72,8 @@ func MustLoad(ctx context.Context, configPath string, envReader envReader) *Conf
 
 	return cfg
 }`
-const code2 = `
+
+var code2 = `
 package config
 
 type EnvConfig struct {

@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/sirupsen/logrus"
@@ -59,18 +60,22 @@ type Code struct {
 }
 
 // Generating code for all files
-func (c *CustomTypeGenerator) Generate() error {
+func (c *CustomTypeGenerator) Generate(wg *sync.WaitGroup, errCh chan error) {
 	for _, file := range c.Files {
-		err := generateCode(file)
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"file":  file.FileName,
-				"error": err,
-			}).Error("failed to generate code")
-			return err
-		}
+		wg.Add(1)
+		go func(file *CustomType) {
+			defer wg.Done()
+			err := generateCode(file)
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"file":  file.FileName,
+					"error": err,
+				}).Error("failed to generate code")
+				errCh <- err
+				return
+			}
+		}(file)
 	}
-	return nil
 }
 
 // Creating file with generated code

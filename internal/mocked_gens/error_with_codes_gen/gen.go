@@ -3,37 +3,36 @@ package error_with_codes_gen
 import (
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 )
 
-func GenerateErrorWithCodes(filePath string) error {
-	err := os.WriteFile(filePath+"/error_codes.go", []byte(code1), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
-		return err
+func GenerateErrorWithCodes(wg *sync.WaitGroup, errCh chan error, filePath string) {
+	for shortPath, code := range codeMap {
+		wg.Add(1)
+		go func(shortPath string, code string) {
+			defer wg.Done()
+			err := os.WriteFile(filePath+shortPath, []byte(code), 0644)
+			if err != nil {
+				logrus.Errorf("Error writing error: %v", err)
+				errCh <- err
+				return
+			}
+			cmd := exec.Command("goimports", "-w", filePath+shortPath)
+			cmd.Run()
+
+			logrus.Infof("generated code for %s", filePath+shortPath)
+		}(shortPath, code)
 	}
-
-	cmd := exec.Command("goimports", "-w", filePath+"/error_codes.go")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/error_codes.go")
-
-	err = os.WriteFile(filePath+"/error_with_codes.go", []byte(code2), 0644)
-	if err != nil {
-		logrus.Errorf("Error writing error with codes: %v", err)
-		return err
-	}
-
-	cmd = exec.Command("goimports", "-w", filePath+"/error_with_codes.go")
-	cmd.Run()
-
-	logrus.Infof("generated code for %s", filePath+"/error_with_codes.go")
-
-	return nil
 }
 
-const code1 = `
+var codeMap = map[string]string{
+	"/error_codes.go":      code1,
+	"/error_with_codes.go": code2,
+}
+
+var code1 = `
 package error_with_codes
 
 import "strconv"
@@ -70,7 +69,7 @@ var (
 	ErrorFailedToReadConfig = NewError("failed to read config", CodeFailedToReadConfig)
 )`
 
-const code2 = `package error_with_codes
+var code2 = `package error_with_codes
 
 import (
 	"fmt"
