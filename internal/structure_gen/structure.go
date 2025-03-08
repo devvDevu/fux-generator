@@ -1,13 +1,13 @@
 package structure_gen
 
 import (
-	"ca-generator/internal/custom_type_gen"
-	"ca-generator/internal/domain_gen"
-	"ca-generator/internal/folders_gen"
-	"ca-generator/internal/json_file_gen"
+	"ca-generator/internal/gens/custom_type_gen"
+	"ca-generator/internal/gens/domain_gen"
+	"ca-generator/internal/gens/folders_gen"
 	"ca-generator/internal/mocked_gens/config_gen"
 	"ca-generator/internal/mocked_gens/env_gen"
 	"ca-generator/internal/mocked_gens/error_with_codes_gen"
+	"ca-generator/internal/mocked_gens/json_file_gen"
 	"ca-generator/internal/mocked_gens/result_gen"
 	"encoding/json"
 	"os"
