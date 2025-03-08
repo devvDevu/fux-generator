@@ -122,46 +122,33 @@ func formatingSettingsData(
 		go func() {
 			defer wg.Done()
 			newPath := filepath.Join(currentPath, key)
+			mu.Lock()
+			defer mu.Unlock()
 			switch v := value.(type) {
 			case map[string]interface{}:
 				// Обрабатываем вложенные директории
-				mu.Lock()
 				*folders = append(*folders, newPath)
-				mu.Unlock()
 				if strings.Contains(newPath, "error_with_codes") {
-					mu.Lock()
 					*errorWithCodes = newPath
-					mu.Unlock()
 				}
 				if strings.Contains(newPath, "config") {
-					mu.Lock()
 					*config = newPath
-					mu.Unlock()
 				}
 				if strings.Contains(newPath, "result") {
-					mu.Lock()
 					*result = newPath
-					mu.Unlock()
 				}
 				if strings.Contains(newPath, "pkg/env") {
-					mu.Lock()
 					*env = newPath
-					mu.Unlock()
 				}
 				formatingSettingsData(v, newPath, folders, files, domains, errorWithCodes, config, result, env)
-
 			case []interface{}:
 				// Обрабатываем файлы
-				mu.Lock()
 				*folders = append(*folders, newPath)
-				mu.Unlock()
 				if strings.Contains(newPath, "common") {
 					for _, item := range v {
 						fileData := item.(map[string]interface{})
 						customType := custom_type_gen.NewCustomType(newPath, fileData["file_name"].(string), fileData["file_ext"].(string), fileData["file_type"].(string))
-						mu.Lock()
 						*files = append(*files, customType)
-						mu.Unlock()
 					}
 				}
 				if strings.Contains(newPath, "model") || strings.Contains(newPath, "value_object") {
@@ -178,12 +165,9 @@ func formatingSettingsData(
 						}
 
 						domain := domain_gen.NewDomain(newPath, fileData["file_name"].(string), fileData["file_ext"].(string), fields)
-						mu.Lock()
 						*domains = append(*domains, domain)
-						mu.Unlock()
 					}
 				}
-
 			}
 		}()
 	}
